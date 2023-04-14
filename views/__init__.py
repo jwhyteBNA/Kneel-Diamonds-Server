@@ -6,4 +6,4 @@ from .order_requests import (get_all_orders,
                             update_order)
 from .size_requests import get_all_sizes, get_single_size
 from .style_requests import get_all_styles, get_single_style
-from .jewelry_requests import get_all_jewelry, get_single_jewel
+from .jewelry_requests import get_all_jewelry, get_single_jewelry
