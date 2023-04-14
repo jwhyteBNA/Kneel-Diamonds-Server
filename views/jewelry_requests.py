@@ -9,7 +9,7 @@ def get_all_jewelry():
     return JEWELRY
 
 # Function with a single parameter
-def get_single_jewel(id):
+def get_single_jewelry(id):
     """To get single jewelry."""
     # Variable to hold the found order, if it exists
     requested_jewel = None
