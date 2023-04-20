@@ -3,6 +3,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from views import get_all_metals, get_all_orders, get_all_sizes, get_all_styles, get_all_jewelry
 from views import get_single_metal, get_single_order, get_single_size, get_single_style
 from views import get_single_jewelry, create_order
+from views import delete_order, update_metal
 
 method_mapper = { }
 
@@ -119,12 +120,12 @@ class HandleRequests(BaseHTTPRequestHandler):
         content_len = int(self.headers.get('content-length', 0))
         post_body = self.rfile.read(content_len)
         post_body = json.loads(post_body)
-        (resource, id) = self.parse_url(self.path)
+        (resource, _) = self.parse_url(self.path)
 
         #Initialize new order
         new_order = None
         if resource == "orders":
-            if "metalId" in post_body and "sizeId" in post_body and "styleId" in post_body and "jewelryId" in post_body:
+            if "metal_id" in post_body and "size_id" in post_body and "style_id" in post_body and "jewelry_id" in post_body:
                 self._set_headers(201)
                 new_order = create_order(post_body)
             else:
@@ -135,34 +136,48 @@ class HandleRequests(BaseHTTPRequestHandler):
     def do_DELETE(self):
         """To Delete Items."""
         # Set a 204 response code
-        delete_order = None
 
         # Parse the URL
         (resource, id) = self.parse_url(self.path)
 
-        # Delete a single order from the list
         if resource == "orders":
-            self._set_headers(405)
-            delete_order = { "message": "To delete order, contact the company directly." }
-            self.wfile.write(json.dumps(delete_order).encode())
+            self._set_headers(204)
+            delete_order(id)
+            self.wfile.write("".encode())
+
+        # Do not allow delete of an order from the list
+        # if resource == "orders":
+        #     self._set_headers(405)
+        #     delete_order = { "message": "To delete order, contact the company directly." }
+        #     self.wfile.write(json.dumps(delete_order).encode())
 
     def do_PUT(self):
         """Handles PUT requests to the server"""
-        update_order = None
         content_len = int(self.headers.get('content-length', 0))
         post_body = self.rfile.read(content_len)
         post_body = json.loads(post_body)
-
         # Parse the URL
-        (resource) = self.parse_url(self.path)
+        (resource, id) = self.parse_url(self.path)
+
+        success = False
 
         # if resource == "orders":
         #     update_order(id, post_body)
+        # if resource == "orders":
+        #     self._set_headers(405)
+        #     update_order = { "message": "Order is now in production and cannot be updated." }
+        #     self.wfile.write(json.dumps(update_order).encode())
+        if resource == "metals":
+            success = update_metal(id, post_body)
 
-        if resource == "orders":
-            self._set_headers(405)
-            update_order = { "message": "Order is now in production and cannot be updated." }
-            self.wfile.write(json.dumps(update_order).encode())
+        if success:
+            self._set_headers(204)
+        else:
+            self._set_headers(404)
+
+        self.wfile.write("".encode())
+
+
 
         # Encode the new order and send in response
         self.wfile.write("".encode())

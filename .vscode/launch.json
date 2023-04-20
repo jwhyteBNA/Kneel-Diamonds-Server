@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "PIONEER",
+            "name": "KNEEL PIONEER",
             "type": "python",
             "request": "launch",
             "program": "./server.py",
@@ -12,7 +12,7 @@
             }
         },
         {
-            "name": "REQUEST HANDLER",
+            "name": "KNEEL REQUEST HANDLER",
             "type": "python",
             "request": "launch",
             "program": "./request_handler.py",
