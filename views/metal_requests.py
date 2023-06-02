@@ -1,39 +1,43 @@
 import sqlite3
-# import json
 from models import Metal
 
-METALS = [
-    { "id": 1, "metal": "Sterling Silver", "price": 400.42 },
-    { "id": 2, "metal": "14K Gold", "price": 736.4 },
-    { "id": 3, "metal": "24K Gold", "price": 1258.9 },
-    { "id": 4, "metal": "Platinum", "price": 795.45 },
-    { "id": 5, "metal": "Palladium", "price": 1241.0 }
-    ]
-
-def get_all_metals():
+def get_all_metals(query_params):
     """Using SQL database to get all metals"""
     with sqlite3.connect("./kneeldiamonds.sqlite3") as conn:
 
         conn.row_factory = sqlite3.Row
         db_cursor = conn.cursor()
 
-        db_cursor.execute("""
-        SELECT
+        sort_by = ""
+
+        sort_options = {
+            "price": "price"
+        }
+
+        for param in query_params:
+            qs_key, qs_value = param.split('=')
+            if qs_key == "_sortBy" and qs_value in sort_options:
+                sort_by = f" ORDER BY {sort_options[qs_value]}"
+
+        sql_to_execute = f""" SELECT
             m.id,
             m.metal,
             m.price         
         FROM Metal m
-        """)
+        {sort_by}
+        """
 
-        metals = []
+    db_cursor.execute(sql_to_execute)
 
-        dataset = db_cursor.fetchall()
+    metals = []
 
-        for row in dataset:
+    dataset = db_cursor.fetchall()
 
-            metal = Metal(row['id'], row['metal'], row['price'])
+    for row in dataset:
 
-            metals.append(metal.__dict__)
+        metal = Metal(row['id'], row['metal'], row['price'])
+
+        metals.append(metal.__dict__)
 
     return metals
 

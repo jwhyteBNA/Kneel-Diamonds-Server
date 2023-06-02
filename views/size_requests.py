@@ -1,27 +1,68 @@
-SIZES = [
-    { "id": 1, "carets": 0.5, "price": 405 },
-    { "id": 2, "carets": 0.75, "price": 782 },
-    { "id": 3, "carets": 1, "price": 1470 },
-    { "id": 4, "carets": 1.5, "price": 1997 },
-    { "id": 5, "carets": 2, "price": 3638 }
-    ]
+import sqlite3
+from models import Size
 
-def get_all_sizes():
-    """Get all sizes."""
-    return SIZES
+def get_all_sizes(query_params):
+    """Using SQL database to get all styles"""
+    with sqlite3.connect("./kneeldiamonds.sqlite3") as conn:
+
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        sort_by = ""
+
+        sort_options = {
+            "price": "price"
+        }
+
+        for param in query_params:
+            qs_key, qs_value = param.split('=')
+            if qs_key == "_sortBy" and qs_value in sort_options:
+                sort_by = f" ORDER BY {sort_options[qs_value]}"
+
+        sql_to_execute = f""" SELECT
+            z.id,
+            z.carets,
+            z.price         
+        FROM Size z
+        {sort_by}
+        """
+    db_cursor.execute(sql_to_execute)
+
+    sizes = []
+
+    dataset = db_cursor.fetchall()
+
+    for row in dataset:
+
+        size = Size(row['id'], row['carets'], row['price'])
+
+        sizes.append(size.__dict__)
+
+    return sizes
+
 
 # Function with a single parameter
 def get_single_size(id):
-    """To get single size."""
-    # Variable to hold the found size, if it exists
-    requested_size = None
+    """New single order request for SQL"""
+    with sqlite3.connect("./kneeldiamonds.sqlite3") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
 
-    # Iterate the SIZES list above. Very similar to the
-    # for..of loops you used in JavaScript.
-    for size in SIZES:
-        # Dictionaries in Python use [] notation to find a key
-        # instead of the dot notation that JavaScript used.
-        if size["id"] == id:
-            requested_size = size
+        # Use a ? parameter to inject a variable's value
+        # into the SQL statement.
+        db_cursor.execute("""
+        SELECT
+            z.id,
+            z.size,
+            z.price         
+        FROM Size z
+        WHERE z.id = ?
+        """, ( id, ))
 
-    return requested_size
+        # Load the single result into memory
+        data = db_cursor.fetchone()
+
+        # Create an animal instance from the current row
+        size = Size(data['id'], data['size'], data['price'], )
+
+        return size.__dict__

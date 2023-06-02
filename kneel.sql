@@ -1,3 +1,7 @@
+DROP TABLE IF EXISTS Metal;
+DROP TABLE IF EXISTS Size;
+DROP TABLE IF EXISTS Style;
+
 CREATE TABLE `Metal`
 (
     `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -40,21 +44,21 @@ CREATE TABLE `Order`
     FOREIGN KEY(`jewelry_id`) REFERENCES `Jewelry`(`id`)
 );
 
-INSERT INTO `Metal` VALUES (null, 'Sterling Silver', 250.00);
-INSERT INTO `Metal` VALUES (null, '14K Gold', 500.25);
-INSERT INTO `Metal` VALUES (null, '24K Gold', 750.00 );
-INSERT INTO `Metal` VALUES (null, 'Platinum', 795.45 );
-INSERT INTO `Metal` VALUES (null, 'Palladium', 999.99 );
+INSERT INTO `Metal` VALUES (null, 'Sterling Silver', 500.00);
+INSERT INTO `Metal` VALUES (null, '14K Gold', 750.25);
+INSERT INTO `Metal` VALUES (null, '24K Gold', 350.00 );
+INSERT INTO `Metal` VALUES (null, 'Platinum', 995.45 );
+INSERT INTO `Metal` VALUES (null, 'Palladium', 850.99 );
 
-INSERT INTO `Size` VALUES (null, 0.50, 400.00);
+INSERT INTO `Size` VALUES (null, 0.50, 760.00);
 INSERT INTO `Size` VALUES (null, 0.75, 500.00);
-INSERT INTO `Size` VALUES (null, 1.00, 600.00 );
+INSERT INTO `Size` VALUES (null, 1.00, 300.00 );
 INSERT INTO `Size` VALUES (null, 1.50, 850.00 );
-INSERT INTO `Size` VALUES (null, 2.00, 975.00 );
+INSERT INTO `Size` VALUES (null, 2.00, 675.00 );
 
-INSERT INTO `Style` VALUES (null, 'Classic', 500.00 );
-INSERT INTO `Style` VALUES (null, 'Modern', 710.00 );
-INSERT INTO `Style` VALUES (null, 'Vintage', 965.00 );
+INSERT INTO `Style` VALUES (null, 'Classic', 710.00 );
+INSERT INTO `Style` VALUES (null, 'Modern', 850.00 );
+INSERT INTO `Style` VALUES (null, 'Vintage', 565.00 );
 
 INSERT INTO `Jewelry` VALUES (null, 'Ring', 1.00 );
 INSERT INTO `Jewelry` VALUES (null, 'Necklace', 2.00 );
