@@ -6,17 +6,6 @@ from models import Order, Jewelry, Metal, Size, Style
 # from .style_requests import get_single_style
 # from .jewelry_requests import get_single_jewelry
 
-ORDERS = [
-    {
-        "id": 1,
-        "metalId": 3,
-        "sizeId": 2,
-        "styleId": 3,
-        "jewelryId": 2,
-        "timestamp": 1614659931693
-    }
-    ]
-
 def get_all_orders():
     """Using SQL database to get all orders with expansion"""
     with sqlite3.connect("./kneeldiamonds.sqlite3") as conn:

@@ -1,4 +1,5 @@
 import json
+from urllib.parse import urlparse
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from views import get_all_metals, get_all_orders, get_all_sizes, get_all_styles, get_all_jewelry
 from views import get_single_metal, get_single_order, get_single_size, get_single_style
@@ -35,68 +36,49 @@ class HandleRequests(BaseHTTPRequestHandler):
 
     def do_GET(self):
         """Handles GET requests to the server """
+        self._set_headers(200)
         response = {}
-        (resource, id) = self.parse_url(self.path)
+        parsed = self.parse_url(self.path)
+        ( resource, id, query_params ) = parsed
 
-        if resource == "metals":
-            if id is not None:
-                response = get_single_metal(id)
-                if response is not None:
-                    self._set_headers(200)
+        if '?' not in self.path:
+            if resource == "metals":
+                if id is not None:
+                    response = get_single_metal(id)
                 else:
-                    self._set_headers(404)
-                    response = { "message": "That metal is not currently in stock for jewelry." }
-            else:
-                self._set_headers(200)
-                response = get_all_metals()
+                    response = get_all_metals(query_params)
+            if resource == "sizes":
+                if id is not None:
+                    response = get_single_size(id)
+                else:
+                    response = get_all_sizes(query_params)
 
-        if resource == "sizes":
-            if id is not None:
-                response = get_single_size(id)
-                if response is not None:
-                    self._set_headers(200)
+            if resource == "styles":
+                if id is not None:
+                    response = get_single_style(id)
                 else:
-                    self._set_headers(404)
-                    response = { "message": "That size is not currently in stock for jewelry." }
-            else:
-                self._set_headers(200)
-                response = get_all_sizes()
+                    response = get_all_styles(query_params)
 
-        if resource == "styles":
-            if id is not None:
-                response = get_single_style(id)
-                if response is not None:
-                    self._set_headers(200)
+            if resource == "jewelry":
+                if id is not None:
+                    response = get_single_jewelry(id)
                 else:
-                    self._set_headers(404)
-                    response = { "message": "That style is not currently in stock for jewelry." }
-            else:
-                self._set_headers(200)
-                response = get_all_styles()
+                    response = get_all_jewelry()
 
-        if resource == "jewelry":
-            if id is not None:
-                response = get_single_jewelry(id)
-                if response is not None:
-                    self._set_headers(200)
+            if resource == "orders":
+                if id is not None:
+                    response = get_single_order(id)
                 else:
-                    self._set_headers(404)
-                    response = { "message": "That jewelry type is out of stock." }
-            else:
-                self._set_headers(200)
-                response = get_all_jewelry()
+                    response = get_all_orders()
 
-        if resource == "orders":
-            if id is not None:
-                response = get_single_order(id)
-                if response is not None:
-                    self._set_headers(200)
-                else:
-                    self._set_headers(404)
-                    response = { "message": "That order was never placed, or was cancelled." }
-            else:
-                self._set_headers(200)
-                response = get_all_orders()
+        else:
+            (resource, id, query_params) = parsed
+            if resource == "metals":
+                response = get_all_metals(query_params)
+            if resource == "sizes":
+                response = get_all_sizes(query_params)
+            if resource == "styles":
+                response = get_all_styles(query_params)
 
 # Original path before creating functions for single objects
         # if self.path == "/metals":
@@ -120,7 +102,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         content_len = int(self.headers.get('content-length', 0))
         post_body = self.rfile.read(content_len)
         post_body = json.loads(post_body)
-        (resource, _) = self.parse_url(self.path)
+        (resource, _, _) = self.parse_url(self.path)
 
         #Initialize new order
         new_order = None
@@ -138,7 +120,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         # Set a 204 response code
 
         # Parse the URL
-        (resource, id) = self.parse_url(self.path)
+        (resource, id, _) = self.parse_url(self.path)
 
         if resource == "orders":
             self._set_headers(204)
@@ -157,7 +139,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         post_body = self.rfile.read(content_len)
         post_body = json.loads(post_body)
         # Parse the URL
-        (resource, id) = self.parse_url(self.path)
+        (resource, id, _) = self.parse_url(self.path)
 
         success = False
 
@@ -206,26 +188,25 @@ class HandleRequests(BaseHTTPRequestHandler):
         self.end_headers()
 
     def parse_url(self, path):
-        """parsing"""
-        # Just like splitting a string in JavaScript. If the
-        # path is "/metals/1", the resulting list will
-        # have "" at index 0, "metals" at index 1, and "1"
-        # at index 2.
-        path_params = path.split("/")
-        resource = path_params[1]
+        """Third tuple component for parsing url, id, and query_params"""
+        url_components = urlparse(path)
+        path_params = url_components.path.strip("/").split("/")
+        query_params = []
+
+        if url_components.query != '':
+            query_params = url_components.query.split("&")
+
+        resource = path_params[0]
         id = None
 
-        # Try to get the item at index 2
         try:
-            # Convert the string "1" to the integer 1
-            # This is the new parseInt()
-            id = int(path_params[2])
+            id = int(path_params[1])
         except IndexError:
-            pass  # No route parameter exists: /metals
+            pass  # No route parameter exists: /animals
         except ValueError:
-            pass  # Request had trailing slash: /metals/
+            pass  # Request had trailing slash: /animals/
 
-        return (resource, id)  # This is a tuple
+        return (resource, id, query_params)
 
 #Starting point of this application.
 def main():
